@@ -1,13 +1,26 @@
 import { GraphQLServer } from 'graphql-yoga';
 
-//Type definitions(also known as schema) -operations that can be performed on the api & the custom data types
+//Scalar Type-String,Boolean,Int,Float,ID
 
+//Type definitions(also known as schema) -operations that can be performed on the api & the custom data types
 const typeDefs = `
 type Query {
-  hello: String!
-  name: String!
-  location: String!
-  bio: String!
+  me: User!
+  post:Post!
+}
+ 
+type User {
+  id:ID!
+  name:String!
+  email:String!
+  age:Int
+}
+
+type Post {
+  id: ID!
+  title:String!
+  body:String!
+  published:Boolean!
 }
 `;
 
@@ -15,17 +28,21 @@ type Query {
 const resolvers = {
   Query: {
     //here are all of the methods for all the queries
-    hello() {
-      return 'This is my first query!';
+    me() {
+      return {
+        id: '123098',
+        name: 'Zarab',
+        email: 'musfiqzarab@iut-dhaka.edu',
+        age: 28,
+      };
     },
-    name() {
-      return 'My Name is Zarab';
-    },
-    location() {
-      return 'I am From Dhaka';
-    },
-    bio() {
-      return 'I Am A Software Developer';
+    post() {
+      return {
+        id: '1234231',
+        title: 'My First Post',
+        body: 'THis post resambles myself',
+        published: true,
+      };
     },
   },
 };
