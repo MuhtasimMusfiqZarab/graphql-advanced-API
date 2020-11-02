@@ -5,6 +5,7 @@ import { GraphQLServer } from 'graphql-yoga';
 //Type definitions(also known as schema) -operations that can be performed on the api & the custom data types
 const typeDefs = `
 type Query {
+  greeting(name: String):String!
   me: User!
   post:Post!
 }
@@ -28,6 +29,15 @@ type Post {
 const resolvers = {
   Query: {
     //here are all of the methods for all the queries
+
+    greeting(parent, args, context, info) {
+      if (args.name) {
+        return `Hello! ${args.name}`;
+      }
+
+      return `Hello!`;
+    },
+
     me() {
       return {
         id: '123098',
