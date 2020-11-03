@@ -1,13 +1,59 @@
 import { GraphQLServer } from 'graphql-yoga';
 
-//Scalar Type-String,Boolean,Int,Float,ID
+//demo user data
+const users = [
+  {
+    id: '1',
+    name: 'Zarab',
+    email: 'musfiqzarab@iut-dhaka.edu',
+    age: 27,
+  },
+  {
+    id: '2',
+    name: 'Mou',
+    email: 'mou@mag.edu',
+  },
+  {
+    id: '3',
+    name: 'Pavel',
+    email: 'pavel@buet.edu',
+    age: 26,
+  },
+];
 
+//demo user's post
+const posts = [
+  {
+    id: '234',
+    title: 'A Long hectic day!',
+    body:
+      'Today was a very hectic day for me. Its all stated with some people who wanted to create some chaos in own very own life',
+    published: false,
+    author: '1',
+  },
+  {
+    id: '767',
+    title: 'A Quarrel',
+    body: "Life won't run by the rules your make for your life",
+    published: false,
+    author: '2',
+  },
+  {
+    id: '443',
+    title: 'People are bad!',
+    body:
+      'The people around you will always like to have the things you own.It creates problem in their life as well as yours. Thus it is better that you deduct them from your life',
+    published: false,
+    author: '1',
+  },
+];
+
+//Scalar Type-String,Boolean,Int,Float,ID
 //Type definitions(also known as schema) -operations that can be performed on the api & the custom data types
 const typeDefs = `
 type Query {
-  greeting(name: String):String!
-  add(numbers:[Float!]!):Float!
-  grades:[Int!]!
+  users(query:String):[User!]!
+  posts(query:String):[Post!]!
   me: User!
   post:Post!
 }
@@ -24,6 +70,7 @@ type Post {
   title:String!
   body:String!
   published:Boolean!
+  author: User!
 }
 `;
 
@@ -32,27 +79,30 @@ const resolvers = {
   Query: {
     //here are all of the methods for all the queries
 
-    greeting(parent, args, context, info) {
-      if (args.name) {
-        return `Hello! ${args.name}`;
+    users(parent, args, ctx, info) {
+      //if query for the user if provided then run complex logic to find the user, else return all users
+      if (!args.query) {
+        return users;
       }
-
-      return `Hello!`;
-    },
-
-    add(parent, args, ctx, info) {
-      if (args.numbers.length == 0) {
-        return 0;
-      }
-
-      //adding all the array element
-      return args.numbers.reduce(
-        (accumulator, currentValue) => accumulator + currentValue
+      return users.filter((user) =>
+        user.name.toLowerCase().includes(args.query.toLowerCase())
       );
     },
+    posts(parent, args, ctx, info) {
+      if (!args.query) {
+        return posts;
+      }
 
-    grades() {
-      return [10, 20];
+      //return all the posts if there is not any certain post to find
+      return posts.filter((post) => {
+        const isTitleMatch = post.title
+          .toLowerCase()
+          .includes(args.query.toLowerCase());
+        const isBodyMatch = post.body
+          .toLowerCase()
+          .includes(args.query.toLowerCase());
+        return isTitleMatch || isBodyMatch;
+      });
     },
 
     me() {
@@ -63,13 +113,21 @@ const resolvers = {
         age: 28,
       };
     },
+
     post() {
       return {
-        id: '1234231',
-        title: 'My First Post',
-        body: 'THis post resambles myself',
+        id: '0954',
+        title: 'Who who?',
+        body: 'What can we expect!',
         published: true,
       };
+    },
+  },
+  //we need a root property on  the resover as to find the author of the post we are referencing a different custom type (ex : author:User!). TThus we need a property that matches of our custom type Post
+  Post: {
+    //to find the author this resolver will run for every single post and the parent will contain every single post
+    author(parent, args, ctx, info) {
+      return users.find((user) => user.id == parent.author);
     },
   },
 };
