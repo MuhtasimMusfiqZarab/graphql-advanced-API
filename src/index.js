@@ -63,6 +63,7 @@ type User {
   name:String!
   email:String!
   age:Int
+  posts:[Post!]!
 }
 
 type Post {
@@ -128,6 +129,13 @@ const resolvers = {
     //to find the author this resolver will run for every single post and the parent will contain every single post
     author(parent, args, ctx, info) {
       return users.find((user) => user.id == parent.author);
+    },
+  },
+
+  //to find all the posts of the user
+  User: {
+    posts(parent, args, ctx, info) {
+      return posts.filter((post) => parent.id == post.author);
     },
   },
 };
