@@ -48,12 +48,40 @@ const posts = [
   },
 ];
 
+const comments = [
+  {
+    id: '4523',
+    text: 'what are you talking about!',
+    author: '2',
+    post: '234',
+  },
+  {
+    id: '078',
+    text: 'All People are like that bro!',
+    author: '3',
+    post: '234',
+  },
+  {
+    id: '4523',
+    text: 'Sorry for everything today',
+    author: '2',
+    post: '767',
+  },
+  {
+    id: '45423',
+    text: 'You are hungry. RIght? ;)',
+    author: '1',
+    post: '443',
+  },
+];
+
 //Scalar Type-String,Boolean,Int,Float,ID
 //Type definitions(also known as schema) -operations that can be performed on the api & the custom data types
 const typeDefs = `
 type Query {
   users(query:String):[User!]!
   posts(query:String):[Post!]!
+  comments(query:String):[Comment!]!
   me: User!
   post:Post!
 }
@@ -64,6 +92,7 @@ type User {
   email:String!
   age:Int
   posts:[Post!]!
+  comments:[Comment!]!
 }
 
 type Post {
@@ -72,6 +101,14 @@ type Post {
   body:String!
   published:Boolean!
   author: User!
+  comments:[Comment!]!
+}
+
+type Comment {
+  id:ID!
+  text:String!
+  author:User!
+  post:Post!
 }
 `;
 
@@ -106,6 +143,10 @@ const resolvers = {
       });
     },
 
+    comments(parent, args, ctx, info) {
+      return comments;
+    },
+
     me() {
       return {
         id: '123098',
@@ -128,14 +169,31 @@ const resolvers = {
   Post: {
     //to find the author this resolver will run for every single post and the parent will contain every single post
     author(parent, args, ctx, info) {
-      return users.find((user) => user.id == parent.author);
+      return users.find((user) => user.id === parent.author);
+    },
+    //find all the comments for the post
+    comments(parent, args, ctx, info) {
+      return comments.filter((comment) => comment.post === parent.id);
     },
   },
 
-  //to find all the posts of the user
   User: {
+    //to find all the posts of the user
     posts(parent, args, ctx, info) {
-      return posts.filter((post) => parent.id == post.author);
+      return posts.filter((post) => parent.id === post.author);
+    },
+    //to find all the comments of the user
+    comments(parent, args, ctx, info) {
+      return comments.filter((comment) => comment.author === parent.id);
+    },
+  },
+  //find the user of the comment
+  Comment: {
+    author(parent, args, ctx, info) {
+      return users.find((user) => user.id === parent.author);
+    },
+    post(parent, argx, ctx, info) {
+      return posts.find((post) => post.id === parent.post);
     },
   },
 };
