@@ -1,4 +1,5 @@
 import { GraphQLServer } from 'graphql-yoga';
+import { v4 as uuidv4 } from 'uuid';
 
 //demo user data
 const users = [
@@ -85,6 +86,10 @@ type Query {
   me: User!
   post:Post!
 }
+
+type Mutation{
+  createUser(name: String!, email: String!, age: Int): User!
+}
  
 type User {
   id:ID!
@@ -165,6 +170,29 @@ const resolvers = {
       };
     },
   },
+
+  //here is the mutaion resolver
+  Mutation: {
+    createUser(parent, args, ctx, info) {
+      const emailTaken = users.some((user) => user.email === args.email);
+      if (emailTaken) {
+        throw new Error('Email is taken already');
+      }
+
+      //create a new user if no email is found
+      const user = {
+        id: uuidv4(),
+        name: args.name,
+        email: args.email,
+        age: args.age,
+      };
+
+      users.push(user);
+
+      return user;
+    },
+  },
+
   //we need a root property on  the resover as to find the author of the post we are referencing a different custom type (ex : author:User!). TThus we need a property that matches of our custom type Post
   Post: {
     //to find the author this resolver will run for every single post and the parent will contain every single post
