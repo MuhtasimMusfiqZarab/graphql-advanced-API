@@ -29,14 +29,14 @@ const posts = [
     title: 'A Long hectic day!',
     body:
       'Today was a very hectic day for me. Its all stated with some people who wanted to create some chaos in own very own life',
-    published: false,
+    published: true,
     author: '1',
   },
   {
     id: '767',
     title: 'A Quarrel',
     body: "Life won't run by the rules your make for your life",
-    published: false,
+    published: true,
     author: '2',
   },
   {
@@ -44,7 +44,7 @@ const posts = [
     title: 'People are bad!',
     body:
       'The people around you will always like to have the things you own.It creates problem in their life as well as yours. Thus it is better that you deduct them from your life',
-    published: false,
+    published: true,
     author: '1',
   },
 ];
@@ -89,6 +89,8 @@ type Query {
 
 type Mutation{
   createUser(name: String!, email: String!, age: Int): User!
+  createPost(title:String!, body:String!, published:Boolean!, author: ID!):Post!
+  createComment(text:String!, author:ID!, post:ID!):Comment!
 }
  
 type User {
@@ -190,6 +192,54 @@ const resolvers = {
       users.push(user);
 
       return user;
+    },
+
+    createPost(parent, args, ctx, info) {
+      //find author id if it exists
+      const userExists = users.some((user) => user.id === args.author);
+
+      if (!userExists) {
+        throw new Error('User not found!');
+      }
+
+      const post = {
+        id: uuidv4(),
+        title: args.title,
+        body: args.body,
+        published: args.published,
+        author: args.author,
+      };
+
+      posts.push(post);
+      return post;
+    },
+
+    createComment(parent, args, ctx, info) {
+      //if user id exists
+      const userExists = users.some((user) => user.id === args.author);
+      //find the post and see if the post is published
+      const postExists = posts.some(
+        (post) => post.id === args.post && post.published
+      );
+
+      if (!userExists) {
+        throw new Error('unable to find user');
+      }
+      if (!postExists) {
+        throw new Error('unable to find post');
+      }
+
+      //create new comment
+      const comment = {
+        id: uuidv4(),
+        text: args.text,
+        author: args.author,
+        post: args.post,
+      };
+
+      comments.push(comment);
+
+      return comment;
     },
   },
 
