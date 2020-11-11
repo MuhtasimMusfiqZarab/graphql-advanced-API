@@ -2,7 +2,7 @@ import { GraphQLServer } from 'graphql-yoga';
 import { v4 as uuidv4 } from 'uuid';
 
 //demo user data
-const users = [
+let users = [
   {
     id: '1',
     name: 'Zarab',
@@ -23,7 +23,7 @@ const users = [
 ];
 
 //demo user's post
-const posts = [
+let posts = [
   {
     id: '234',
     title: 'A Long hectic day!',
@@ -45,11 +45,11 @@ const posts = [
     body:
       'The people around you will always like to have the things you own.It creates problem in their life as well as yours. Thus it is better that you deduct them from your life',
     published: true,
-    author: '1',
+    author: '2',
   },
 ];
 
-const comments = [
+let comments = [
   {
     id: '4523',
     text: 'what are you talking about!',
@@ -89,6 +89,7 @@ type Query {
 
 type Mutation{
   createUser(data: CreateUserInput): User!
+  deleteUser(id:ID!): User!
   createPost(data: CreatePostInput):Post!
   createComment(data: CreateCommentInput):Comment!
 }
@@ -209,6 +210,37 @@ const resolvers = {
       users.push(user);
 
       return user;
+    },
+
+    deleteUser(parent, args, ctx, info) {
+      //find the index of the user
+      const userIndex = users.findIndex((user) => user.id === args.id);
+
+      //if not found
+      if (userIndex === -1) {
+        throw new Error('User not found!');
+      }
+
+      //remove the user on that index
+      //returing an array of the deleted users, here there is one item deleted
+      const deletedUsers = users.splice(userIndex, 1);
+
+      //remove the associated posts and comments of the user
+      posts = posts.filter((post) => {
+        const match = post.author === args.id;
+
+        //delete all the comments if it match
+        if (match) {
+          comments = comments.filter((comment) => comment.post !== post.id);
+        }
+
+        return !match;
+      });
+
+      //remove the comments the user has created on other's post
+      comments = comments.filter((comment) => comment.author !== args.id);
+
+      return deletedUsers[0];
     },
 
     createPost(parent, args, ctx, info) {
