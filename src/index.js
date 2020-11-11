@@ -88,9 +88,28 @@ type Query {
 }
 
 type Mutation{
-  createUser(name: String!, email: String!, age: Int): User!
-  createPost(title:String!, body:String!, published:Boolean!, author: ID!):Post!
-  createComment(text:String!, author:ID!, post:ID!):Comment!
+  createUser(data: CreateUserInput): User!
+  createPost(data: CreatePostInput):Post!
+  createComment(data: CreateCommentInput):Comment!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  age: Int
+}
+
+input CreatePostInput {
+  title: String!
+  body: String!
+  published: Boolean!
+  author: ID!
+}
+
+input CreateCommentInput {
+  text: String!
+  author: ID!
+  post: ID!
 }
  
 type User {
@@ -176,7 +195,7 @@ const resolvers = {
   //here is the mutaion resolver
   Mutation: {
     createUser(parent, args, ctx, info) {
-      const emailTaken = users.some((user) => user.email === args.email);
+      const emailTaken = users.some((user) => user.email === args.data.email);
       if (emailTaken) {
         throw new Error('Email is taken already');
       }
@@ -184,7 +203,7 @@ const resolvers = {
       //create a new user if no email is found
       const user = {
         id: uuidv4(),
-        ...args,
+        ...args.data,
       };
 
       users.push(user);
@@ -194,7 +213,7 @@ const resolvers = {
 
     createPost(parent, args, ctx, info) {
       //find author id if it exists
-      const userExists = users.some((user) => user.id === args.author);
+      const userExists = users.some((user) => user.id === args.data.author);
 
       if (!userExists) {
         throw new Error('User not found!');
@@ -202,7 +221,7 @@ const resolvers = {
 
       const post = {
         id: uuidv4(),
-        ...args,
+        ...args.data,
       };
 
       posts.push(post);
@@ -211,10 +230,10 @@ const resolvers = {
 
     createComment(parent, args, ctx, info) {
       //if user id exists
-      const userExists = users.some((user) => user.id === args.author);
+      const userExists = users.some((user) => user.id === args.data.author);
       //find the post and see if the post is published
       const postExists = posts.some(
-        (post) => post.id === args.post && post.published
+        (post) => post.id === args.data.post && post.published
       );
 
       if (!userExists) {
@@ -227,7 +246,7 @@ const resolvers = {
       //create new comment
       const comment = {
         id: uuidv4(),
-        ...args,
+        ...args.data,
       };
 
       comments.push(comment);
