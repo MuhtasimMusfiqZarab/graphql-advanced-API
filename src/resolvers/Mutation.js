@@ -52,6 +52,38 @@ const Mutation = {
     return deletedUsers[0];
   },
 
+  updateUser(parent, args, { db }, info) {
+    const { id, data } = args;
+    //if user exits
+    const user = db.users.find((user) => user.id === id);
+
+    if (!user) {
+      throw new Error('User not found!');
+    }
+
+    //check if email is provided
+    if (typeof data.email === 'string') {
+      //if the new email is taken already
+      const emailTaken = db.users.some((user) => user.email === data.email);
+
+      if (emailTaken) {
+        throw new Error('Email is taken already!');
+      }
+      user.email = data.email;
+    }
+
+    //if name exits
+    if (typeof data.name === 'string') {
+      user.name = data.name;
+    }
+
+    //if age exists to be updated
+    if (typeof data.age !== 'undefined') {
+      user.age = data.age;
+    }
+    return user;
+  },
+
   createPost(parent, args, { db }, info) {
     //find author id if it exists
     const userExists = db.users.some((user) => user.id === args.data.author);
