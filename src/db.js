@@ -1,5 +1,5 @@
 //demo user data
-let users = [
+const users = [
   {
     id: '1',
     name: 'Zarab',
@@ -20,7 +20,7 @@ let users = [
 ];
 
 //demo user's post
-let posts = [
+const posts = [
   {
     id: '234',
     title: 'A Long hectic day!',
@@ -46,7 +46,7 @@ let posts = [
   },
 ];
 
-let comments = [
+const comments = [
   {
     id: '4523',
     text: 'what are you talking about!',
