@@ -14,7 +14,7 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
-    "graphql-yoga": "^1.18.3",
+    "graphql-yoga": "^2.13.13",
     "uuid": "^8.3.1"
   },
   "devDependencies": {
